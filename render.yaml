@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: global-cost-of-living-api
+    runtime: python
+    buildCommand: ./startup.sh
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.6
