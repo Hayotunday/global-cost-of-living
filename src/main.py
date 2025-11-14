@@ -93,6 +93,11 @@ def load_and_clean_csv() -> pd.DataFrame:
 # ROUTES
 # -------------------------------
 
+@app.get("/")
+async def root():
+    return {"message": "Global Cost of Living API is live!", "status": "ready"}
+
+
 @app.get("/health")
 def health():
     """Simple health check."""
