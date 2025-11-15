@@ -82,15 +82,18 @@ COLUMN_MAP = {
 # HELPERS
 # -------------------------------
 def load_and_clean_csv() -> pd.DataFrame:
-    """Load CSV and replace NaN/inf with None (JSON null)."""
-    if not os.path.exists(CSV_PATH):
-        raise HTTPException(
-            status_code=500,
-            detail="Dataset not found. Run `python scripts/update_dataset.py` first."
-        )
+    if not CSV_PATH.exists():
+        raise HTTPException(status_code=500, detail="Dataset missing.")
+
+    print(f"Loading dataset from {CSV_PATH}")
     df = pd.read_csv(CSV_PATH)
-    # Convert NaN, inf, -inf → None (becomes null in JSON)
+
+    # --- FIX: Drop duplicate columns ---
+    df = df.loc[:, ~df.columns.duplicated(keep='first')]
+    # ----------------------------------
+
     df = df.replace([np.nan, np.inf, -np.inf], None)
+    print(f"Loaded {len(df)} rows, {len(df.columns)} unique columns")
     return df
 
 # -------------------------------
