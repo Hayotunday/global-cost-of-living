@@ -2,6 +2,7 @@
 import os
 import subprocess
 from pathlib import Path
+import shutil
 
 # --- ABSOLUTE PATH ---
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -27,8 +28,6 @@ def main():
     if not csv_files:
         raise FileNotFoundError("No CSV found after download")
 
-    # Move to expected location
-    import shutil
     shutil.move(str(csv_files[0]), str(CSV_TARGET))
     print(f"Dataset ready: {CSV_TARGET}")
 
