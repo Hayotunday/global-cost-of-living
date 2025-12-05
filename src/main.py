@@ -242,6 +242,10 @@ COLUMN_MAP = {
 # -------------------------------
 # HELPERS
 # -------------------------------
+def normalize_string(s: str) -> str:
+    """Normalize string by replacing hyphens with spaces and converting to lowercase."""
+    return s.strip().lower().replace("-", " ")
+
 def load_and_clean_csv() -> pd.DataFrame:
     """Load CSV and replace NaN/inf with None."""
     if not CSV_PATH.exists():
@@ -298,15 +302,21 @@ async def get_city_data(request: Request):
     if language not in ["en", "de"]:
         raise HTTPException(status_code=400, detail="Unsupported language. Use 'en' or 'de'.")
 
-    city_key = city.strip().lower()
-    country_key = country.strip().lower()
+    # Normalize city and country (replace hyphens with spaces, lowercase)
+    city_key = normalize_string(city)
+    country_key = normalize_string(country)
 
     # Load fresh data
     df = load_and_clean_csv()
 
-    # Filter by BOTH city and country (case-insensitive)
-    mask = (df['city'].str.lower() == city_key) & (df['country'].str.lower() == country_key)
-    filtered = df[mask]
+    # Normalize dataset values for matching
+    df_normalized = df.copy()
+    df_normalized['city'] = df['city'].apply(normalize_string)
+    df_normalized['country'] = df['country'].apply(normalize_string)
+
+    # Filter by BOTH city and country (case-insensitive, hyphen-normalized)
+    mask = (df_normalized['city'] == city_key) & (df_normalized['country'] == country_key)
+    filtered = df.loc[mask]  # Use original df to preserve original values
 
     if filtered.empty:
         raise HTTPException(
